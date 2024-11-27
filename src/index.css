@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  font-family: "Inter";
+}
+
+.roboto_font {
+  font-family: "Roboto", sans-serif;
+}
+
+.input-shadow {
+  box-shadow: 0px 0px 0px 1px rgba(134, 143, 160, 0.16),
+    0px 1px 2px 0px rgba(0, 0, 0, 0.06);
+}
+
+.input-shadow-error {
+  box-shadow: 0px 0px 0px 1px rgba(253, 2, 15, 0.4),
+    0px 1px 2px 0px rgba(255, 0, 0, 0.2);
+}
+
+.custome_background {
+  background-image: url("/public/images/bg-app.png");
+}
+
+.quicksand-font {
+  font-family: "Quicksand", sans-serif;
+}
+
+.input-shadow {
+  box-shadow: 0px 0px 0px 1px rgba(134, 143, 160, 0.16),
+    0px 1px 2px 0px rgba(0, 0, 0, 0.06);
+}
+
+.button_cancel-shadow {
+  box-shadow: 0px 0px 0px 1px rgba(70, 79, 96, 0.16),
+    0px 1px 1px 0px rgba(0, 0, 0, 0.1);
+}
+
+.table-shadow {
+  box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.08);
+}
+
+.button-option-shadow {
+  box-shadow: 0px 2px 4px 0px rgba(41, 121, 255, 0.24),
+    0px 1px 2px 0px rgba(27, 78, 163, 0.24);
+}
+
+.shadow-blue {
+  box-shadow: 0px 4px 8px 0px rgba(41, 121, 255, 0.2),
+    0px 2px 4px 0px rgba(27, 78, 163, 0.2);
+}
+
+.shadow-dark {
+  box-shadow: 0px 2px 4px 0px rgba(90, 91, 106, 0.24),
+    0px 1px 2px 0px rgba(58, 58, 68, 0.24);
+}
+
+@keyframes slideInFromBottomRight {
+  0% {
+    transform: translate(100%, 100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+.sort-custom-animation {
+  animation: slideInFromBottomRight 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(50%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.custom-animation-in {
+  animation: slideIn 0.2s ease-out forwards;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
