@@ -73,11 +73,11 @@ const Dropdown = ({ label, options }: Props) => {
                 </p>
                 <div className='flex items-center justify-center w-[24px] h-[24px]'>
                     {selectedLabel === label ? (
-                        <img src="./icons/ic-dropdown.svg" alt='icon' />
+                        <img src="/icons/ic-dropdown.svg" alt='icon' />
                     ) : (
                         <img
                             onClick={handleResetSort}
-                            src="./icons/ic-close.svg"
+                            src="/icons/ic-close.svg"
                             alt='icon'
                             className='w-3 h-3 cursor-pointer'
                         />

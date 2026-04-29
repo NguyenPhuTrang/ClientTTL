@@ -1,5 +1,6 @@
-import { StarIcon } from '@heroicons/react/20/solid'
-
+import { useState } from 'react';
+import { StarIcon } from '@heroicons/react/20/solid';
+import { cartApi } from '../../services/cart.service';
 
 interface Props {
     product: any;
@@ -9,81 +10,139 @@ function classNames(...classes: any[]) {
     return classes.filter(Boolean).join(' ')
 }
 
-const ProductOverview = ({
-    product
-}: Props) => {
+const ProductOverview = ({ product }: Props) => {
+    const [loading, setLoading] = useState(false);
+    const [added, setAdded] = useState(false);
+
     function formatMoney(amount: any) {
         return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
+
+    const saleValue = parseFloat(product.sale);
+    const hasSale = !isNaN(saleValue) && saleValue > 0;
+
+    const handleAddToCart = async () => {
+        try {
+            setLoading(true);
+            const res: any = await cartApi.addToCart({
+                productId: product.id || product._id,
+                quantity: 1,
+            });
+
+            if (res.success) {
+                setAdded(true);
+                setTimeout(() => setAdded(false), 2000);
+            } else {
+                alert(res.message ?? 'Thêm vào giỏ hàng thất bại');
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            alert('Thêm vào giỏ hàng thất bại');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <div className="bg-white">
-            <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-10 lg:grid lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
-                {/* Product details */}
-                <div className="lg:max-w-lg lg:self-end">
-                    <div className="mt-4">
-                        <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{product.name}</h1>
-                    </div>
+        <div className="bg-white rounded-2xl overflow-hidden w-full max-w-[800px]
+            shadow-[0_8px_40px_rgba(200,120,140,0.15)]">
+            <div className="flex flex-col lg:flex-row min-h-[480px]">
 
-                    <section aria-labelledby="information-heading" className="mt-4">
-                        <h2 id="information-heading" className="sr-only">
-                            Product information
-                        </h2>
+                {/* Left — Image */}
+                <div className="relative lg:w-[380px] shrink-0 bg-gradient-to-br from-[#fce8ee] to-[#fdf0f5]
+                    flex items-center justify-center p-6">
+                    {hasSale && (
+                        <div className="absolute top-4 left-4 z-10 bg-[#e87aab] text-white
+                            text-[11px] font-[800] tracking-wider px-3 py-1.5 rounded-full
+                            shadow-[0_4px_12px_rgba(232,122,171,0.4)]">
+                            -{saleValue}% OFF
+                        </div>
+                    )}
+                    <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-contain"
+                    />
+                </div>
 
-                        <div className="flex items-center">
-                            <p className="text-lg text-gray-900 sm:text-xl">${formatMoney(product.price)}</p>
-
-                            <div className="ml-4 border-l border-gray-300 pl-4">
-                                <h2 className="sr-only">Reviews</h2>
-                                <div className="flex items-center">
-                                    <div className="flex items-center">
-                                        {[0, 1, 2, 3, 4].map((rating) => (
-                                            <StarIcon
-                                                key={rating}
-                                                className={classNames(
-                                                    product.rating > rating ? 'text-[#FB8200]' : 'text-gray-300',
-                                                    'h-5 w-5 flex-shrink-0'
-                                                )}
-                                                aria-hidden="true"
-                                            />
-                                        ))}
-                                    </div>
+                {/* Right — Details */}
+                <div className="flex-1 flex flex-col p-8 gap-5 justify-between">
+                    <div className="flex flex-col gap-4">
+                        <h1 className="text-[22px] font-[800] leading-[30px] text-[#3d1a2b] tracking-tight">
+                            {product.name}
+                        </h1>
+                        <div className="flex items-center justify-between">
+                            <span className="text-[30px] font-[800] text-[#d46080] leading-none">
+                                ${formatMoney(product.price)}
+                            </span>
+                            <div className="flex items-center gap-2 bg-[#fdf5f7] px-3 py-1.5 rounded-xl">
+                                <div className="flex items-center gap-0.5">
+                                    {[0, 1, 2, 3, 4].map((r) => (
+                                        <StarIcon
+                                            key={r}
+                                            className={classNames(
+                                                product.rating > r ? 'text-[#e87aab]' : 'text-[#f0d0da]',
+                                                'h-[13px] w-[13px]'
+                                            )}
+                                        />
+                                    ))}
                                 </div>
+                                <span className="text-[13px] font-[600] text-[#c0768a]">{product.rating}</span>
                             </div>
                         </div>
-
-                        <div className="mt-4 space-y-6">
-                            <p className="text-base text-gray-500">{product.description}</p>
+                        <div className="h-px bg-gradient-to-r from-[#fce8ee] via-[#e87aab]/30 to-[#fce8ee]" />
+                        <p className="text-[14px] font-[400] leading-[24px] text-[#9a7080]">
+                            {product.description}
+                        </p>
+                        <div className="flex flex-col gap-1 mt-1">
+                            <div className="flex items-center justify-between py-2.5 border-b border-[#fce8ee]">
+                                <span className="text-[13px] text-[#c0a0ac]">Quantity available</span>
+                                <span className="text-[13px] font-[600] text-[#5a3045]">{product.quantity}</span>
+                            </div>
+                            <div className="flex items-center justify-between py-2.5 border-b border-[#fce8ee]">
+                                <span className="text-[13px] text-[#c0a0ac]">Condition</span>
+                                <span className="text-[13px] font-[600] text-[#5a3045]">{product.condition || 'New'}</span>
+                            </div>
+                            {product.delivery && (
+                                <div className="flex items-center justify-between py-2.5 border-b border-[#fce8ee]">
+                                    <span className="text-[13px] text-[#c0a0ac]">Delivery</span>
+                                    <span className="text-[13px] font-[600] text-[#5a3045]">{product.delivery}</span>
+                                </div>
+                            )}
+                            {hasSale && (
+                                <div className="flex items-center justify-between py-2.5 border-b border-[#fce8ee]">
+                                    <span className="text-[13px] text-[#c0a0ac]">Discount</span>
+                                    <span className="text-[13px] font-[600] text-[#e87aab]">{saleValue}% OFF</span>
+                                </div>
+                            )}
                         </div>
-                    </section>
-                </div>
-
-                <div className="mt-10 lg:col-start-2 lg:row-span-2 lg:mt-0 lg:self-center">
-                    <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg">
-                        <img src={product.image} alt='img' className="h-full w-full object-cover object-center" />
                     </div>
-                </div>
 
-                <div className="mt-10 lg:col-start-1 lg:row-start-2 lg:max-w-lg lg:self-start">
-                    <section aria-labelledby="options-heading">
-                        <h2 id="options-heading" className="sr-only">
-                            Product options
-                        </h2>
-
-                        <form>
-                            <div className="mt-10">
-                                <button
-                                    type="submit"
-                                    className="flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
-                                >
-                                    Add to card
-                                </button>
-                            </div>
-                        </form>
-                    </section>
+                    {/* Button */}
+                    <button
+                        type="button"
+                        onClick={handleAddToCart}
+                        disabled={loading || product.quantity === 0}
+                        className="w-full h-[52px] rounded-2xl border-none text-white text-[15px] font-[700]
+                            cursor-pointer transition-all duration-200 tracking-wide mt-2
+                            bg-gradient-to-r from-[#f0a0bc] via-[#e87aab] to-[#d46080]
+                            shadow-[0_6px_20px_rgba(220,100,150,0.35)]
+                            hover:shadow-[0_8px_28px_rgba(220,100,150,0.5)] hover:-translate-y-0.5
+                            active:scale-[0.97]
+                            disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                    >
+                        {loading
+                            ? 'Adding...'
+                            : added
+                            ? '✓ Added to Cart'
+                            : product.quantity === 0
+                            ? 'Out of Stock'
+                            : 'Add to Cart'}
+                    </button>
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default ProductOverview;

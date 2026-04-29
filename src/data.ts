@@ -2,32 +2,32 @@ import { OptionGroup } from "./types";
 
 const arrayData = [
     {
-        icon: "./icons/ic-prison.svg",
+        icon: "/icons/ic-prison.svg",
         title: "4pt grid system",
         description: "Base on 4pt grid system. Our UI kit help you create perfect white space"
     },
     {
-        icon: "./icons/ic-dropper.svg",
+        icon: "/icons/ic-dropper.svg",
         title: "Color style",
         description: "All color in OpenArt are styled. You can change all design color with one click"
     },
     {
-        icon: "./icons/ic-text_color.svg",
+        icon: "/icons/ic-text_color.svg",
         title: "Free font",
         description: "OpenArt use Epilogue font family Available with open licence in gooogle font"
     },
     {
-        icon: "./icons/ic-toggle_on.svg",
+        icon: "/icons/ic-toggle_on.svg",
         title: "Darkmode avaiable",
         description: "Our UI Kit support darkmode Chage your design to dark mode with one click"
     },
     {
-        icon: "./icons/ic-design.svg",
+        icon: "/icons/ic-design.svg",
         title: "Easy to customize",
         description: "Create any design with OpenArt UI kits"
     },
     {
-        icon: "./icons/ic-four_squares.svg",
+        icon: "/icons/ic-four_squares.svg",
         title: "Variant components",
         description: "All component art variant, easy to design, easy to control"
     }
@@ -215,62 +215,62 @@ const listBanner = [
 const categorysHeader = [
     {
         active: true,
-        icon: './icons/ic-hanger.svg',
+        icon: '/icons/ic-hanger.svg',
         title: 'Clothing & Shoes',
     },
     {
         active: false,
-        icon: './icons/ic-cinema.svg',
+        icon: '/icons/ic-cinema.svg',
         title: 'Entertainment',
     },
     {
         active: false,
-        icon: './icons/ic-concert.svg',
+        icon: '/icons/ic-concert.svg',
         title: 'Music',
     },
     {
         active: false,
-        icon: './icons/ic-fitness.svg',
+        icon: '/icons/ic-fitness.svg',
         title: 'Sport & Lifestyle',
     },
     {
         active: false,
-        icon: './icons/ic-pets.svg',
+        icon: '/icons/ic-pets.svg',
         title: 'Pets',
     },
     {
         active: false,
-        icon: './icons/ic-restaraunt.svg',
+        icon: '/icons/ic-restaraunt.svg',
         title: 'Kitchen Accessories',
     },
     {
         active: false,
-        icon: './icons/ic-observation.svg',
+        icon: '/icons/ic-observation.svg',
         title: 'Travel Equipment',
     },
     {
         active: false,
-        icon: './icons/ic-barley.svg',
+        icon: '/icons/ic-barley.svg',
         title: 'Growing & Garden',
     },
     {
         active: false,
-        icon: './icons/ic-powerstation.svg',
+        icon: '/icons/ic-powerstation.svg',
         title: 'Electrical Tools',
     },
     {
         active: false,
-        icon: './icons/ic-babysitter.svg',
+        icon: '/icons/ic-babysitter.svg',
         title: 'Mother Care',
     },
     {
         active: false,
-        icon: './icons/ic-nuclear-station.svg',
+        icon: '/icons/ic-nuclear-station.svg',
         title: 'Toys & Entertainment',
     },
     {
         active: false,
-        icon: './icons/ic-ship-wheel.svg',
+        icon: '/icons/ic-ship-wheel.svg',
         title: 'Vintage',
     },
 ]

@@ -3,8 +3,10 @@ const routes = {
     product: '/product',
     login: '/login',
     register: '/register',
+    category: '/category/:id',
     notFoundPage: "/*",
 };
+
 const config = {
     routes,
 };

@@ -25,7 +25,7 @@ const Header = () => {
 
             <div className="flex item-center justify-between lg:order-2 md:order-2 sm:order-1 sm:mb-4 md:mb-0 lg:mb-0 sm:justify-end sm:relative sm:w-full md:w-auto">
                 <img
-                    src='./icons/ic-menu.svg'
+                    src='/icons/ic-menu.svg'
                     alt='menu'
                     className='w-[24px] h-[24px] sm:block md:hidden cursor-pointer select-none'
                     onClick={() => setIsShowMenu(!isShowMenu)}
@@ -43,13 +43,13 @@ const Header = () => {
                         onClick={() => { setIsShowMenu(false) }}
                         className='flex items-center justify-start w-full md:hidden cursor-pointer mb-5'
                     >
-                        <img src='./icons/ic-close.svg' alt='' className='w-5 h-5' />
+                        <img src='/icons/ic-close.svg' alt='' className='w-5 h-5' />
                     </div>
                     <div className='sm:w-full md:full md:w-auto md:bg-white sm:sm:bg-white group md:px-4 md:py-[7px] relative'>
                         <div className='flex items-center justify-center'>
                             <p className='text-[14px] font-[400] leading-[20px] text-[#5A5B6A] select-none'>Show all</p>
                             <div className='flex items-center justify-center w-[24px] h-[24px]'>
-                                <img src="./icons/ic-dropdown.svg" alt='' />
+                                <img src="/icons/ic-dropdown.svg" alt='' />
                             </div>
                         </div>
                         <ul
@@ -83,7 +83,7 @@ const Header = () => {
                                 }}
                                 className='w-[28px] h-[28px] flex items-center justify-center'
                             >
-                                <img src='./icons/ic-view-list.svg' alt='list' className='w-full' />
+                                <img src='/icons/ic-view-list.svg' alt='list' className='w-full' />
                             </div>
                         </li>
                         <li className='flex items-center justify-items-center bg-[#fff] rounded border-[1px] py-1 px-5 select-none cursor-pointer border-[#fff] button-option-shadow'>
@@ -94,7 +94,7 @@ const Header = () => {
                                 }}
                                 className='w-[28px] h-[28px] flex items-center justify-center'
                             >
-                                <img src='./icons/ic-view-grid.svg' alt='list' className='w-full' />
+                                <img src='/icons/ic-view-grid.svg' alt='list' className='w-full' />
                             </div>
                         </li>
                     </ul>
@@ -122,7 +122,7 @@ const Header = () => {
                         <div
                             className='w-[28px] h-[28px] flex items-center justify-center'
                         >
-                            <img src='./icons/ic-view-list.svg' alt='list' className='w-[18px] h-[18px]' />
+                            <img src='/icons/ic-view-list.svg' alt='list' className='w-[18px] h-[18px]' />
                         </div>
                     </li>
                     <li
@@ -136,7 +136,7 @@ const Header = () => {
                         <div
                             className='w-[28px] h-[28px] flex items-center justify-center'
                         >
-                            <img src='./icons/ic-view-grid.svg' alt='list' className='w-[18px] h-[18px]' />
+                            <img src='/icons/ic-view-grid.svg' alt='list' className='w-[18px] h-[18px]' />
                         </div>
                     </li>
                 </ul>

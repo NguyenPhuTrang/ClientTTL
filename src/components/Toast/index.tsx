@@ -20,10 +20,10 @@ const ToastMessage = ({
     const dispatch = useDispatch();
 
     const icons: { [key: string]: string } = {
-        success: '../icons/ic-sucess.svg',
-        error: '../icons/ic-error.svg',
-        warning: '../icons/ic-warning.svg',
-        info: '../icons/ic-informative.svg',
+        success: './icons/ic-sucess.svg',
+        error: './icons/ic-error.svg',
+        warning: './icons/ic-warning.svg',
+        info: './icons/ic-informative.svg',
     };
 
     const backgroundColors: { [key: string]: string } = {
@@ -75,7 +75,7 @@ const ToastMessage = ({
             <div className='flex items-center justify-center'>
                 <img
                     onClick={handleCloseToast}
-                    src="../icons/ic-close-toast.svg"
+                    src="./icons/ic-close-toast.svg"
                     alt=""
                     className='w-3 h-3 cursor-pointer'
                 />

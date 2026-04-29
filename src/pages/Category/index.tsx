@@ -1,67 +1,49 @@
 import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header';
-import TypeProduct from '../../components/TypeProduct';
-import ListProduct from '../../components/ListProduct';
-import { listBanner, listButton } from '../../data';
-import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import EcommerceDesktopLayout from '../../layouts/EcommerceDesktop';
+import ListProduct from '../../components/ListProduct';
+import StackedListsProduct from '../../components/StackedListsProduct';
 import Banner from '../../components/Banner';
+import { listBanner } from '../../data';
+import { useSelector } from 'react-redux';
 import * as ProductApi from '../../hooks';
 import { Product } from '../../types';
-import StackedListsProduct from '../../components/StackedListsProduct';
 
-const ProductPage = () => {
-
+const CategoryPage = () => {
+    const { id } = useParams();
     const [dataProducts, setProducts] = useState<Product[]>([]);
-    const sortPrice = useSelector((state: any) => state.dataSort.priceSort);
-    const sortRating = useSelector((state: any) => state.dataSort.ratingSort);
+    const [loading, setLoading] = useState(true);
     const activeViewList = useSelector((state: any) => state.activeViewList?.activeViewList);
 
-    const [loading, setLoading] = useState(true)
-
     useEffect(() => {
-        const fetchProducts = async () => {
+        const fetchProductsByCategory = async () => {
             try {
-                let queryParams: {
-                    page: number;
-                    limit: number;
-                    keyword?: string;
-                    orderBy?: string;
-                    orderDirection?: string;
-                    price?: string;
-                    rating?: string;
-                } = {
+                setLoading(true);
+                const response = await ProductApi.getAllProducts({
                     page: 1,
-                    limit: 10
-                };
-                if (sortPrice === 'High to low') {
-                    queryParams.price = 'desc';
-                }
-                if (sortPrice === 'Low to high') {
-                    queryParams.price = 'asc';
-                }
-                if (sortRating !== '') {
-                    queryParams.rating = sortRating;
-                }
-
-                const response = await ProductApi.getAllProducts(queryParams);
+                    limit: 10,
+                    categoryId: id, 
+                });
                 if (response.success) {
                     setProducts(response.data?.items || []);
-                    setLoading(false);
                 }
             } catch (error) {
+                console.error('Error fetching products by category:', error);
+            } finally {
                 setLoading(false);
-                console.error('Error fetching products:', error);
             }
+        };
+
+        if (id) {
+            fetchProductsByCategory();
         }
-        fetchProducts();
-    }, [sortPrice, sortRating])
+    }, [id]); 
 
     return (
         <EcommerceDesktopLayout>
             <div className="w-full flex flex-col shadow-dark rounded-lg">
                 <Header />
-                <TypeProduct listButton={listButton} />
                 {loading ? (
                     <div className='w-full flex items-center justify-center p-20'>
                         <h3 className='mr-4'>Loading</h3>
@@ -80,7 +62,9 @@ const ProductPage = () => {
                                 <div className="w-full border-t border-gray-300" />
                             </div>
                             <div className="relative flex justify-center">
-                                <span className="bg-white px-2 text-sm text-gray-500">Không có sản phẩm</span>
+                                <span className="bg-white px-2 text-sm text-gray-500">
+                                    Không có sản phẩm trong danh mục này
+                                </span>
                             </div>
                         </div>
                     )
@@ -91,4 +75,4 @@ const ProductPage = () => {
     );
 };
 
-export default ProductPage;
+export default CategoryPage;

@@ -1,10 +1,10 @@
 import { IBodyResponse, ICommonListQuery, IGetListResponse } from "../common/interfaces";
 import axiosInstance, { ApiService } from "../plugins/axios";
 
-class ProductApiService extends ApiService {
+class CategoryApiService extends ApiService {
     constructor() {
         super({
-            baseUrl: '/product'
+            baseUrl: '/category'
         }, axiosInstance);
     }
 
@@ -17,4 +17,4 @@ class ProductApiService extends ApiService {
     }
 }
 
-export const productApi = new ProductApiService();
+export const categoryApi = new CategoryApiService();

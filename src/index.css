@@ -26,10 +26,6 @@ body {
     0px 1px 2px 0px rgba(255, 0, 0, 0.2);
 }
 
-.custome_background {
-  background-image: url("/public/images/bg-app.png");
-}
-
 .quicksand-font {
   font-family: "Quicksand", sans-serif;
 }

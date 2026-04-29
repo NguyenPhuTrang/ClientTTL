@@ -23,9 +23,9 @@ const CollapsedFilters = ({
                 <p className='text-[16px] text-[#19191D] font-[400] leading-[24px] pl-2 select-none'>{title}</p>
                 <div className='w-10 h-10 flex items-center justify-center select-none'>
                     {isShowMenu ? (
-                        <img src="./icons/ic-top.svg" alt="icon" className=' select-none' />
+                        <img src="/icons/ic-top.svg" alt="icon" className=' select-none' />
                     ) : (
-                        <img src="./icons/ic-bottom.svg" alt="icon" className=' select-none' />
+                        <img src="/icons/ic-bottom.svg" alt="icon" className=' select-none' />
                     )}
                 </div>
             </div>

@@ -1,122 +1,249 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useUserStore } from '../../features/auth/stores/user.store';
 import { RootState } from '../../types';
 import Search from '../Search';
 import { logout } from '../../plugins/axios';
 import Modal from '../Modal';
 
+
+const CartIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+    </svg>
+);
+
+const ChevronDownIcon = () => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <path d="M6 9l6 6 6-6" />
+    </svg>
+);
+
+const LogoutIcon = () => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+);
+
 const HeaderDesktop = () => {
     const userProfile = useSelector((state: RootState) => state.userProfile);
     const { getUserProfile } = useUserStore();
+    const navigate = useNavigate();
+    const [isShowModal, setIsShowModal] = useState(false);
+    const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false);
+
     useEffect(() => {
         getUserProfile();
     }, []);
 
-    const [isShowModal, setIsShowModal] = useState(false);
     const handleLogout = () => {
         setIsShowModal(false);
         logout(true);
-    }
+    };
 
-    const closeModal = () => {
-        setIsShowModal(false);
-    }
+    const closeModal = () => setIsShowModal(false);
+
+    const isLoggedIn = userProfile?.email && userProfile.email !== '';
 
     return (
-        <div className='flex flex-col mb-4'>
-            <div className='flex items-center justify-between'>
-                <div className='flex items-center justify-between'>
-                    <div className='mr-[6px]'>
-                        <img src="./icons/ic-logo-desktop.svg" alt="logo" className="w-[208px] h-[88px]" />
-                    </div>
-                    <div className='px-4'>
-                        <p className='text-[#5A5B6A] text-[20px] cursor-pointer font-[400] leading-[32px]'>Sell on Shopka</p>
-                    </div>
-                    <div className='px-4'>
-                        <p className='text-[#5A5B6A] text-[20px] font-[400] leading-[32px] cursor-pointer hover:text-[#9DC2FF]'>
-                            <Link to='/register'>
+        <>
+            <header className="w-full bg-white border-b border-[#fce8ee] shadow-[0_2px_16px_rgba(200,120,140,0.07)]">
+                <div className="flex items-center justify-between px-8 h-[68px] gap-6">
+
+                    <div className="flex items-center gap-6 shrink-0">
+                        <Link to="/" className="flex items-center">
+                            <img
+                                src="/images/Logo.png"
+                                alt="logo"
+                                className="h-[44px] w-auto"
+                            />
+                        </Link>
+
+                        <div className="h-5 w-px bg-[#fce8ee]" />
+
+                        <nav className="flex items-center gap-1">
+                            <button
+                                type="button"
+                                className="px-3 py-1.5 text-[14px] font-[500] text-[#c0768a] rounded-lg
+                                    hover:bg-[#fce8ee] hover:text-[#d46080] transition-all duration-150 cursor-pointer
+                                    border-none bg-transparent"
+                            >
+                                Sell on Shopka
+                            </button>
+
+                            <Link
+                                to="/register"
+                                className="px-3 py-1.5 text-[14px] font-[500] text-[#c0768a] rounded-lg no-underline
+                                    hover:bg-[#fce8ee] hover:text-[#d46080] transition-all duration-150"
+                            >
                                 Register
                             </Link>
-                        </p>
+
+                            <button
+                                type="button"
+                                className="flex items-center gap-1 px-3 py-1.5 text-[14px] font-[500] text-[#c0768a] rounded-lg
+                                    hover:bg-[#fce8ee] hover:text-[#d46080] transition-all duration-150 cursor-pointer
+                                    border-none bg-transparent"
+                            >
+                                Consumer Electronics
+                                <ChevronDownIcon />
+                            </button>
+                        </nav>
                     </div>
-                </div>
-                <div className='flex items-center justify-between py-5'>
-                    <Search />
-                    <div className='py-[6px] px-4 ml-[14px]'>
-                        <h3 className='text-[20px] text-[#2264D1] font-[400] leading-[32px] cursor-pointer'>
-                            Consumer Electronics
-                        </h3>
+                    <div className="flex-1 max-w-[420px]">
+                        <Search />
                     </div>
-                </div>
-                <div className='flex items-center justify-between py-5'>
-                    {userProfile && (
-                        <div className='flex items-center justify-center px-3 py-2 rounded border-[1px] border-solid border-[#9DC2FF] mr-[21px]
-                        hover:bg-[#9DC2FF] cursor-pointer'>
-                            {userProfile.email !== "" ? (
-                                <button onClick={() => setIsShowModal(true)} type='button'>
-                                    <p className='text-[#2264D1] text-[20px] font-[700] leading-[30px] select-none quicksand-font'>Sign out</p>
+                    <div className="flex items-center gap-3 shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => navigate('/cart')}
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#f0d0da]
+                                text-[#d46080] text-[14px] font-[600] bg-white
+                                hover:bg-[#fce8ee] hover:border-[#e87aab] transition-all duration-150
+                                cursor-pointer shadow-[0_1px_4px_rgba(200,120,140,0.08)]"
+                        >
+                            <CartIcon />
+                            <span>My Cart</span>
+                        </button>
+
+                        {userProfile && (
+                            isLoggedIn ? (
+                                <button
+                                    type="button"
+                                    onClick={() => setIsShowModal(true)}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#f0d0da]
+                                        text-[#d46080] text-[14px] font-[600] bg-white
+                                        hover:bg-[#fce8ee] hover:border-[#e87aab] transition-all duration-150
+                                        cursor-pointer shadow-[0_1px_4px_rgba(200,120,140,0.08)]"
+                                >
+                                    <LogoutIcon />
+                                    <span>Sign Out</span>
                                 </button>
                             ) : (
-                                <Link to='/login'>
-                                    <p className='text-[#2264D1] text-[20px] font-[700] leading-[30px] select-none quicksand-font'>Sign in</p>
+                                <Link
+                                    to="/login"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl no-underline
+                                        text-white text-[14px] font-[600]
+                                        bg-gradient-to-r from-[#f0a0bc] via-[#e87aab] to-[#f0a0bc]
+                                        shadow-[0_3px_12px_rgba(220,100,150,0.25)]
+                                        hover:shadow-[0_4px_16px_rgba(220,100,150,0.4)] hover:-translate-y-px
+                                        transition-all duration-150"
+                                >
+                                    Sign In
                                 </Link>
+                            )
+                        )}
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setIsAvatarMenuOpen(!isAvatarMenuOpen)}
+                                className="flex items-center gap-1.5 rounded-full border-2 border-[#f0d0da]
+                                    hover:border-[#e87aab] transition-all duration-150 cursor-pointer bg-transparent p-0"
+                            >
+                                <div className="w-9 h-9 rounded-full overflow-hidden">
+                                    {userProfile?.avatarUrl && userProfile.avatarUrl !== '' ? (
+                                        <img
+                                            src={userProfile.avatarUrl}
+                                            alt="avatar"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-[#f0a0bc] to-[#e87aab] flex items-center justify-center">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                                            </svg>
+                                        </div>
+                                    )}
+                                </div>
+                            </button>
+                            {isAvatarMenuOpen && (
+                                <div className="absolute top-[calc(100%+8px)] right-0 w-[160px] bg-white rounded-xl
+                                    border border-[#fce8ee] shadow-[0_8px_24px_rgba(200,120,140,0.15)] z-50 overflow-hidden">
+                                    <div className="py-1">
+                                        {isLoggedIn && (
+                                            <div className="px-4 py-2.5 border-b border-[#fce8ee]">
+                                                <p className="text-[12px] text-[#c0a0ac] truncate">{userProfile?.email}</p>
+                                            </div>
+                                        )}
+                                        <Link
+                                            to="/profile"
+                                            onClick={() => setIsAvatarMenuOpen(false)}
+                                            className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#5a3045]
+                                                no-underline hover:bg-[#fce8ee] transition-colors"
+                                        >
+                                            Profile
+                                        </Link>
+                                        <Link
+                                            to="/orders"
+                                            onClick={() => setIsAvatarMenuOpen(false)}
+                                            className="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#5a3045]
+                                                no-underline hover:bg-[#fce8ee] transition-colors"
+                                        >
+                                            My Orders
+                                        </Link>
+                                        {isLoggedIn && (
+                                            <button
+                                                type="button"
+                                                onClick={() => { setIsAvatarMenuOpen(false); setIsShowModal(true); }}
+                                                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#e06080]
+                                                    bg-transparent border-none cursor-pointer hover:bg-[#fce8ee] transition-colors text-left
+                                                    border-t border-[#fce8ee]"
+                                            >
+                                                <LogoutIcon />
+                                                Sign Out
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                             )}
                         </div>
-                    )}
-                    <div className='flex items-center justify-center px-3 py-2 rounded bg-[#fff] shadow-blue mr-[16px]
-                    hover:bg-[#9DC2FF] cursor-pointer'>
-                        <p className='text-[#2264D1] text-[20px] font-[700] leading-[30px] select-none quicksand-font'>My cart</p>
-                    </div>
-                    <div className='flex items-center justify-center rounded-full overflow-hidden mr-[16px] relative'>
-                        <div className='w-10 h-10'>
-                            {userProfile.avatarUrl !== "" ? (
-                                <img src={userProfile.avatarUrl} alt="avatar" className=' w-10 h-10' />
-                            ) : (
-                                <img src="./icons/ic-avatar-svgrepo.svg" alt="avatar" className=' w-10 h-10' />
-                            )}
-                        </div>
-
-                        <ul className='absolute top-[100%] w-[100px] right-0 shadow-dark bg-black'>
-                            <li className='text-[#000]'>1</li>
-                            <li className='text-[#000]'>2</li>
-                            <li className='text-[#000]'>3</li>
-                        </ul>
                     </div>
                 </div>
-            </div>
-            {
-                isShowModal && (
-                    <Modal open={isShowModal} onClose={closeModal}>
-                        <div className="transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all p-10">
-                            <div className="sm:flex sm:items-start">
-                                <div className="mt-1 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                    <p className="text-sm text-red-600">Bạn muốn đăng xuất?</p>
-                                </div>
+            </header>
+            {isShowModal && (
+                <Modal open={isShowModal} onClose={closeModal}>
+                    <div className="bg-white rounded-2xl shadow-[0_8px_40px_rgba(200,120,140,0.18)] p-8 w-[340px]">
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="w-12 h-12 rounded-full bg-[#fce8ee] flex items-center justify-center">
+                                <LogoutIcon />
                             </div>
-                            <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                                <button
-                                    type="button"
-                                    className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto"
-                                    onClick={handleLogout}
-                                >
-                                    Đăng xuất
-                                </button>
-                                <button
-                                    type="button"
-                                    className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                                    onClick={() => setIsShowModal(false)}
-                                >
-                                    Hủy
-                                </button>
-
+                            <div className="text-center">
+                                <h3 className="text-[16px] font-bold text-[#5a3045] mb-1">Sign Out</h3>
+                                <p className="text-[13px] text-[#c0a0ac]">Are you sure you want to sign out?</p>
                             </div>
                         </div>
-                    </Modal>
-                )
-            }
-        </div>
+
+                        <div className="flex gap-3 mt-7">
+                            <button
+                                type="button"
+                                onClick={closeModal}
+                                className="flex-1 h-[42px] rounded-xl border border-[#f0d0da] text-[#c0768a]
+                                    text-[14px] font-[600] bg-white hover:bg-[#fce8ee] transition-all
+                                    cursor-pointer"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleLogout}
+                                className="flex-1 h-[42px] rounded-xl border-none text-white
+                                    text-[14px] font-[600] cursor-pointer transition-all duration-150
+                                    bg-gradient-to-r from-[#f0a0bc] via-[#e87aab] to-[#f0a0bc]
+                                    shadow-[0_3px_12px_rgba(220,100,150,0.25)]
+                                    hover:shadow-[0_4px_16px_rgba(220,100,150,0.4)] hover:-translate-y-px
+                                    active:scale-[0.98]"
+                            >
+                                Sign Out
+                            </button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+        </>
     );
 };
 
