@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import EcommerceDesktopLayout from '../../layouts/EcommerceDesktop';
 import { cartApi } from '../../services/cart.service';
 import { useNavigate } from 'react-router-dom';
@@ -24,6 +25,76 @@ type ConfirmAction =
     | { type: 'clear' }
     | null;
 
+/* ── Inline Toast ─────────────────────────────────────────────────── */
+type ToastVariant = 'remove' | 'clear';
+
+interface ToastState {
+    show: boolean;
+    visible: boolean;
+    variant: ToastVariant;
+    sub?: string;
+}
+
+const CartToast = ({ visible, variant, sub }: Omit<ToastState, 'show'>) => {
+    const message = variant === 'remove' ? 'Đã xóa sản phẩm!' : 'Đã xóa toàn bộ giỏ hàng!';
+
+    const el = (
+        <>
+            <style>{`
+                @keyframes toastSlideDown {
+                    from { transform: translateX(-50%) translateY(-120%); opacity: 0; }
+                    to   { transform: translateX(-50%) translateY(0);     opacity: 1; }
+                }
+                @keyframes toastSlideUp {
+                    from { transform: translateX(-50%) translateY(0);     opacity: 1; }
+                    to   { transform: translateX(-50%) translateY(-120%); opacity: 0; }
+                }
+                .cart-toast-enter { animation: toastSlideDown 0.38s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+                .cart-toast-exit  { animation: toastSlideUp   0.30s cubic-bezier(0.4,0,1,1) forwards; }
+            `}</style>
+            <div
+                className={`fixed top-5 left-1/2 z-[9999] flex items-center gap-3
+                    bg-white rounded-2xl px-5 py-3.5
+                    shadow-[0_8px_32px_rgba(220,100,150,0.22),0_2px_8px_rgba(0,0,0,0.08)]
+                    border border-[#fce8ee] min-w-[260px] max-w-[380px]
+                    ${visible ? 'cart-toast-enter' : 'cart-toast-exit'}`}
+                style={{ transform: 'translateX(-50%)' }}
+                role="status"
+                aria-live="polite"
+            >
+                <div className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center
+                    bg-gradient-to-br from-[#f0a0bc] to-[#c04060]
+                    shadow-[0_4px_10px_rgba(220,100,150,0.35)]">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                        <path d="M10 11v6"/><path d="M14 11v6"/>
+                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                    </svg>
+                </div>
+
+                <div className="flex flex-col min-w-0">
+                    <span className="text-[13px] font-[700] text-[#3d1a2b] leading-tight">
+                        {message}
+                    </span>
+                    {sub && (
+                        <span className="text-[11px] text-[#c0768a] leading-tight truncate">
+                            {sub}
+                        </span>
+                    )}
+                </div>
+
+                <svg className="shrink-0 ml-auto" width="32" height="32" viewBox="0 0 24 24" fill="#e87aab">
+                    <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm4.3 7.6-5 5a1 1 0 0 1-1.4 0l-2-2a1 1 0 1 1 1.4-1.4l1.3 1.3 4.3-4.3a1 1 0 0 1 1.4 1.4z"/>
+                </svg>
+            </div>
+        </>
+    );
+
+    return createPortal(el, document.body);
+};
+
 const TrashIcon = () => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e06080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="3 6 5 6 21 6" />
@@ -33,12 +104,29 @@ const TrashIcon = () => (
     </svg>
 );
 
+const DISPLAY_MS = 2500;
+const EXIT_MS = 320;
+
 const CartPage = () => {
     const [cart, setCart] = useState<Cart | null>(null);
     const [loading, setLoading] = useState(true);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+    const [toastState, setToastState] = useState<ToastState>({
+        show: false, visible: false, variant: 'remove',
+    });
     const navigate = useNavigate();
+
+    const triggerToast = useCallback((variant: ToastVariant, sub?: string) => {
+        setToastState(prev => ({ ...prev, visible: false, show: false }));
+        setTimeout(() => {
+            setToastState({ show: true, visible: true, variant, sub });
+            setTimeout(() => {
+                setToastState(prev => ({ ...prev, visible: false }));
+                setTimeout(() => setToastState(prev => ({ ...prev, show: false })), EXIT_MS);
+            }, DISPLAY_MS);
+        }, 50);
+    }, []);
 
     function formatMoney(amount: any) {
         return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -55,9 +143,7 @@ const CartPage = () => {
         }
     };
 
-    useEffect(() => {
-        fetchCart();
-    }, []);
+    useEffect(() => { fetchCart(); }, []);
 
     const handleUpdateQuantity = async (productId: string, quantity: number) => {
         if (quantity < 1) return;
@@ -72,11 +158,14 @@ const CartPage = () => {
         }
     };
 
-    const handleRemoveItem = async (productId: string) => {
+    const handleRemoveItem = async (productId: string, productName?: string) => {
         try {
             setUpdatingId(productId);
             const res: any = await cartApi.removeCartItem(productId);
-            if (res.success) setCart(res.data);
+            if (res.success) {
+                setCart(res.data);
+                triggerToast('remove', productName);
+            }
         } catch (error) {
             console.error('Error removing item:', error);
         } finally {
@@ -87,7 +176,10 @@ const CartPage = () => {
     const handleClearCart = async () => {
         try {
             const res: any = await cartApi.clearCart();
-            if (res.success) setCart(res.data);
+            if (res.success) {
+                setCart(res.data);
+                triggerToast('clear');
+            }
         } catch (error) {
             console.error('Error clearing cart:', error);
         }
@@ -96,7 +188,7 @@ const CartPage = () => {
     const handleConfirm = async () => {
         if (!confirmAction) return;
         if (confirmAction.type === 'remove') {
-            await handleRemoveItem(confirmAction.productId);
+            await handleRemoveItem(confirmAction.productId, confirmAction.productName);
         } else if (confirmAction.type === 'clear') {
             await handleClearCart();
         }
@@ -110,9 +202,15 @@ const CartPage = () => {
 
     return (
         <EcommerceDesktopLayout>
-            <div className="w-full flex flex-col gap-6 pb-10">
+            {toastState.show && (
+                <CartToast
+                    visible={toastState.visible}
+                    variant={toastState.variant}
+                    sub={toastState.sub}
+                />
+            )}
 
-                {/* Header */}
+            <div className="w-full flex flex-col gap-6 pb-10">
                 <div className="flex items-center justify-between">
                     <h1 className="text-[22px] font-[800] text-[#3d1a2b]">My Cart</h1>
                     {cart && cart.items.length > 0 && (
@@ -152,8 +250,6 @@ const CartPage = () => {
                     </div>
                 ) : (
                     <div className="flex flex-col lg:flex-row gap-6 items-start">
-
-                        {/* Cart items */}
                         <div className="flex-1 flex flex-col gap-3">
                             {cart.items.map((item) => (
                                 <div
@@ -162,23 +258,13 @@ const CartPage = () => {
                                         border border-[#fce8ee] shadow-[0_2px_12px_rgba(200,120,140,0.06)]"
                                 >
                                     <div className="w-20 h-20 rounded-xl overflow-hidden bg-[#fdf5f7] shrink-0">
-                                        <img
-                                            src={item.productImage}
-                                            alt={item.productName}
-                                            className="w-full h-full object-cover"
-                                        />
+                                        <img src={item.productImage} alt={item.productName} className="w-full h-full object-cover" />
                                     </div>
 
                                     <div className="flex-1 flex flex-col gap-1 min-w-0">
-                                        <p className="text-[14px] font-[600] text-[#3d1a2b] truncate">
-                                            {item.productName}
-                                        </p>
-                                        <p className="text-[16px] font-[700] text-[#d46080]">
-                                            ${formatMoney(item.price)}
-                                        </p>
-                                        <p className="text-[12px] text-[#c0a0ac]">
-                                            Subtotal: ${formatMoney(item.price * item.quantity)}
-                                        </p>
+                                        <p className="text-[14px] font-[600] text-[#3d1a2b] truncate">{item.productName}</p>
+                                        <p className="text-[16px] font-[700] text-[#d46080]">${formatMoney(item.price)}</p>
+                                        <p className="text-[12px] text-[#c0a0ac]">Subtotal: ${formatMoney(item.price * item.quantity)}</p>
                                     </div>
 
                                     <div className="flex items-center gap-2 shrink-0">
@@ -187,27 +273,18 @@ const CartPage = () => {
                                             disabled={updatingId === item.productId || item.quantity <= 1}
                                             className="w-8 h-8 rounded-lg bg-[#fce8ee] text-[#d46080] text-[16px] font-[700]
                                                 flex items-center justify-center border-none cursor-pointer
-                                                hover:bg-[#f0d0da] transition-colors
-                                                disabled:opacity-40 disabled:cursor-not-allowed"
-                                        >
-                                            −
-                                        </button>
-                                        <span className="w-8 text-center text-[14px] font-[600] text-[#5a3045]">
-                                            {item.quantity}
-                                        </span>
+                                                hover:bg-[#f0d0da] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                        >−</button>
+                                        <span className="w-8 text-center text-[14px] font-[600] text-[#5a3045]">{item.quantity}</span>
                                         <button
                                             onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
                                             disabled={updatingId === item.productId}
                                             className="w-8 h-8 rounded-lg bg-[#fce8ee] text-[#d46080] text-[16px] font-[700]
                                                 flex items-center justify-center border-none cursor-pointer
-                                                hover:bg-[#f0d0da] transition-colors
-                                                disabled:opacity-40 disabled:cursor-not-allowed"
-                                        >
-                                            +
-                                        </button>
+                                                hover:bg-[#f0d0da] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                        >+</button>
                                     </div>
 
-                                    {/* Remove button — giờ mở confirm modal */}
                                     <button
                                         onClick={() => setConfirmAction({ type: 'remove', productId: item.productId, productName: item.productName })}
                                         disabled={updatingId === item.productId}
@@ -224,61 +301,44 @@ const CartPage = () => {
                             ))}
                         </div>
 
-                        {/* Order summary */}
                         <div className="lg:w-[320px] shrink-0 bg-white rounded-2xl border border-[#fce8ee]
                             shadow-[0_2px_12px_rgba(200,120,140,0.06)] p-6 flex flex-col gap-4 sticky top-4">
-
                             <h2 className="text-[16px] font-[700] text-[#3d1a2b]">Order Summary</h2>
                             <div className="h-px bg-[#fce8ee]" />
-
                             <div className="flex flex-col gap-3">
                                 <div className="flex items-center justify-between">
                                     <span className="text-[13px] text-[#c0a0ac]">Items ({cart.items.length})</span>
-                                    <span className="text-[13px] font-[600] text-[#5a3045]">
-                                        ${formatMoney(cart.totalPrice)}
-                                    </span>
+                                    <span className="text-[13px] font-[600] text-[#5a3045]">${formatMoney(cart.totalPrice)}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-[13px] text-[#c0a0ac]">Shipping</span>
                                     <span className="text-[13px] font-[600] text-green-500">Free</span>
                                 </div>
                             </div>
-
                             <div className="h-px bg-[#fce8ee]" />
-
                             <div className="flex items-center justify-between">
                                 <span className="text-[15px] font-[700] text-[#3d1a2b]">Total</span>
-                                <span className="text-[20px] font-[800] text-[#d46080]">
-                                    ${formatMoney(cart.totalPrice)}
-                                </span>
+                                <span className="text-[20px] font-[800] text-[#d46080]">${formatMoney(cart.totalPrice)}</span>
                             </div>
-
                             <button
                                 onClick={() => navigate('/checkout')}
                                 className="w-full h-[52px] rounded-2xl border-none text-white text-[15px] font-[700]
                                     cursor-pointer transition-all duration-200
                                     bg-gradient-to-r from-[#f0a0bc] via-[#e87aab] to-[#d46080]
                                     shadow-[0_6px_20px_rgba(220,100,150,0.35)]
-                                    hover:shadow-[0_8px_28px_rgba(220,100,150,0.5)] hover:-translate-y-0.5
-                                    active:scale-[0.97]"
-                            >
-                                Proceed to Checkout
-                            </button>
-
+                                    hover:shadow-[0_8px_28px_rgba(220,100,150,0.5)] hover:-translate-y-0.5 active:scale-[0.97]"
+                            >Proceed to Checkout</button>
                             <button
                                 onClick={() => navigate('/product')}
                                 className="w-full h-[44px] rounded-2xl border border-[#f0d0da] text-[#d46080]
                                     text-[14px] font-[600] bg-white cursor-pointer transition-all
                                     hover:bg-[#fce8ee] active:scale-[0.97]"
-                            >
-                                Continue Shopping
-                            </button>
+                            >Continue Shopping</button>
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Confirm Modal */}
             {confirmAction && (
                 <Modal open={!!confirmAction} onClose={() => setConfirmAction(null)}>
                     <div className="bg-white rounded-2xl shadow-[0_8px_40px_rgba(200,120,140,0.18)] p-8 w-[340px]">
@@ -291,16 +351,13 @@ const CartPage = () => {
                                 <p className="text-[13px] text-[#c0a0ac]">{confirmMessage}</p>
                             </div>
                         </div>
-
                         <div className="flex gap-3 mt-7">
                             <button
                                 type="button"
                                 onClick={() => setConfirmAction(null)}
                                 className="flex-1 h-[42px] rounded-xl border border-[#f0d0da] text-[#c0768a]
                                     text-[14px] font-[600] bg-white hover:bg-[#fce8ee] transition-all cursor-pointer"
-                            >
-                                Cancel
-                            </button>
+                            >Cancel</button>
                             <button
                                 type="button"
                                 onClick={handleConfirm}
@@ -308,8 +365,7 @@ const CartPage = () => {
                                     text-[14px] font-[600] cursor-pointer transition-all duration-150
                                     bg-gradient-to-r from-[#f0a0bc] via-[#e87aab] to-[#f0a0bc]
                                     shadow-[0_3px_12px_rgba(220,100,150,0.25)]
-                                    hover:shadow-[0_4px_16px_rgba(220,100,150,0.4)] hover:-translate-y-px
-                                    active:scale-[0.98]"
+                                    hover:shadow-[0_4px_16px_rgba(220,100,150,0.4)] hover:-translate-y-px active:scale-[0.98]"
                             >
                                 {confirmAction.type === 'clear' ? 'Clear All' : 'Remove'}
                             </button>

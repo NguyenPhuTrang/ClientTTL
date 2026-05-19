@@ -31,10 +31,24 @@ const LogoutIcon = () => (
 
 const HeaderDesktop = () => {
     const userProfile = useSelector((state: RootState) => state.userProfile);
+    const cart = useSelector((state: any) => state.cart);
     const { getUserProfile } = useUserStore();
     const navigate = useNavigate();
     const [isShowModal, setIsShowModal] = useState(false);
     const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false);
+    const [badgeBump, setBadgeBump] = useState(false);
+
+    // Tổng số lượng sản phẩm trong giỏ
+    const cartCount = cart?.items?.reduce((sum: number, item: any) => sum + item.quantity, 0) ?? 0;
+
+    // Hiệu ứng bump mỗi khi cartCount tăng
+    useEffect(() => {
+        if (cartCount > 0) {
+            setBadgeBump(true);
+            const t = setTimeout(() => setBadgeBump(false), 350);
+            return () => clearTimeout(t);
+        }
+    }, [cartCount]);
 
     useEffect(() => {
         getUserProfile();
@@ -51,6 +65,16 @@ const HeaderDesktop = () => {
 
     return (
         <>
+            <style>{`
+                @keyframes badgeBump {
+                    0%   { transform: scale(1); }
+                    40%  { transform: scale(1.45); }
+                    70%  { transform: scale(0.9); }
+                    100% { transform: scale(1); }
+                }
+                .badge-bump { animation: badgeBump 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+            `}</style>
+
             <header className="w-full bg-white border-b border-[#fce8ee] shadow-[0_2px_16px_rgba(200,120,140,0.07)]">
                 <div className="flex items-center justify-between px-8 h-[68px] gap-6">
 
@@ -94,20 +118,39 @@ const HeaderDesktop = () => {
                             </button>
                         </nav>
                     </div>
+
                     <div className="flex-1 max-w-[420px]">
                         <Search />
                     </div>
+
                     <div className="flex items-center gap-3 shrink-0">
+
+                        {/* Cart button với badge */}
                         <button
                             type="button"
                             onClick={() => navigate('/cart')}
-                            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#f0d0da]
+                            className="relative flex items-center gap-2 px-4 py-2 rounded-xl border border-[#f0d0da]
                                 text-[#d46080] text-[14px] font-[600] bg-white
                                 hover:bg-[#fce8ee] hover:border-[#e87aab] transition-all duration-150
                                 cursor-pointer shadow-[0_1px_4px_rgba(200,120,140,0.08)]"
                         >
                             <CartIcon />
                             <span>My Cart</span>
+
+                            {/* Badge số lượng */}
+                            {cartCount > 0 && (
+                                <span
+                                    key={cartCount}
+                                    className={`absolute -top-2 -right-2 min-w-[20px] h-5 px-1.5
+                                        rounded-full text-[11px] font-[800] text-white
+                                        flex items-center justify-center leading-none
+                                        bg-gradient-to-br from-[#f0a0bc] to-[#d46080]
+                                        shadow-[0_2px_8px_rgba(220,100,150,0.45)]
+                                        ${badgeBump ? 'badge-bump' : ''}`}
+                                >
+                                    {cartCount > 99 ? '99+' : cartCount}
+                                </span>
+                            )}
                         </button>
 
                         {userProfile && (
@@ -137,6 +180,7 @@ const HeaderDesktop = () => {
                                 </Link>
                             )
                         )}
+
                         <div className="relative">
                             <button
                                 type="button"
@@ -204,6 +248,7 @@ const HeaderDesktop = () => {
                     </div>
                 </div>
             </header>
+
             {isShowModal && (
                 <Modal open={isShowModal} onClose={closeModal}>
                     <div className="bg-white rounded-2xl shadow-[0_8px_40px_rgba(200,120,140,0.18)] p-8 w-[340px]">
