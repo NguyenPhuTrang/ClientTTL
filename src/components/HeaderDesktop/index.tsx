@@ -250,8 +250,8 @@ const HeaderDesktop = () => {
             </header>
 
             {isShowModal && (
-                <Modal open={isShowModal} onClose={closeModal}>
-                    <div className="bg-white rounded-2xl shadow-[0_8px_40px_rgba(200,120,140,0.18)] p-8 w-[340px]">
+             <Modal open={isShowModal} onClose={closeModal} size="sm">
+                 <div className="bg-white rounded-2xl shadow-[0_8px_40px_rgba(200,120,140,0.18)] p-8 w-full">
                         <div className="flex flex-col items-center gap-4">
                             <div className="w-12 h-12 rounded-full bg-[#fce8ee] flex items-center justify-center">
                                 <LogoutIcon />

@@ -5,12 +5,19 @@ import { cartApi } from '../../services/cart.service';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../../components/Modal';
 
+interface CartItemColor {
+    label: string;
+    value: string;
+}
+
 interface CartItem {
     productId: string;
     productName: string;
     productImage: string;
     price: number;
     quantity: number;
+    color?: CartItemColor;
+    size?: string;
 }
 
 interface Cart {
@@ -25,7 +32,6 @@ type ConfirmAction =
     | { type: 'clear' }
     | null;
 
-/* ── Inline Toast ─────────────────────────────────────────────────── */
 type ToastVariant = 'remove' | 'clear';
 
 interface ToastState {
@@ -63,7 +69,7 @@ const CartToast = ({ visible, variant, sub }: Omit<ToastState, 'show'>) => {
                 aria-live="polite"
             >
                 <div className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center
-                    bg-gradient-to-br from-[#f0a0bc] to-[#c04060]
+                    bg-gradient-to-br from-[#f0a0bc] to-[#d46080]
                     shadow-[0_4px_10px_rgba(220,100,150,0.35)]">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                         stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -73,7 +79,6 @@ const CartToast = ({ visible, variant, sub }: Omit<ToastState, 'show'>) => {
                         <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
                     </svg>
                 </div>
-
                 <div className="flex flex-col min-w-0">
                     <span className="text-[13px] font-[700] text-[#3d1a2b] leading-tight">
                         {message}
@@ -84,7 +89,6 @@ const CartToast = ({ visible, variant, sub }: Omit<ToastState, 'show'>) => {
                         </span>
                     )}
                 </div>
-
                 <svg className="shrink-0 ml-auto" width="32" height="32" viewBox="0 0 24 24" fill="#e87aab">
                     <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm4.3 7.6-5 5a1 1 0 0 1-1.4 0l-2-2a1 1 0 1 1 1.4-1.4l1.3 1.3 4.3-4.3a1 1 0 0 1 1.4 1.4z"/>
                 </svg>
@@ -96,11 +100,12 @@ const CartToast = ({ visible, variant, sub }: Omit<ToastState, 'show'>) => {
 };
 
 const TrashIcon = () => (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e06080" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="3 6 5 6 21 6" />
-        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-        <path d="M10 11v6" /><path d="M14 11v6" />
-        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e06080"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6"/><path d="M14 11v6"/>
+        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
     </svg>
 );
 
@@ -129,7 +134,7 @@ const CartPage = () => {
     }, []);
 
     function formatMoney(amount: any) {
-        return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return Number(amount).toLocaleString('vi-VN');
     }
 
     const fetchCart = async () => {
@@ -195,10 +200,10 @@ const CartPage = () => {
         setConfirmAction(null);
     };
 
-    const confirmTitle = confirmAction?.type === 'clear' ? 'Clear Cart' : 'Remove Item';
+    const confirmTitle = confirmAction?.type === 'clear' ? 'Xóa giỏ hàng' : 'Xóa sản phẩm';
     const confirmMessage = confirmAction?.type === 'clear'
-        ? 'Are you sure you want to remove all items from your cart?'
-        : `Remove "${(confirmAction as any)?.productName}" from your cart?`;
+        ? 'Bạn có chắc muốn xóa toàn bộ sản phẩm trong giỏ hàng?'
+        : `Xóa "${(confirmAction as any)?.productName}" khỏi giỏ hàng?`;
 
     return (
         <EcommerceDesktopLayout>
@@ -211,32 +216,39 @@ const CartPage = () => {
             )}
 
             <div className="w-full flex flex-col gap-6 pb-10">
+
+                {/* Header */}
                 <div className="flex items-center justify-between">
-                    <h1 className="text-[22px] font-[800] text-[#3d1a2b]">My Cart</h1>
+                    <h1 className="text-[22px] font-[800] text-[#3d1a2b]">Giỏ hàng</h1>
                     {cart && cart.items.length > 0 && (
                         <button
                             onClick={() => setConfirmAction({ type: 'clear' })}
-                            className="text-[13px] text-[#e06080] font-[500] hover:underline cursor-pointer bg-transparent border-none"
+                            className="text-[13px] text-[#e06080] font-[500] hover:underline
+                                cursor-pointer bg-transparent border-none"
                         >
-                            Clear all
+                            Xóa tất cả
                         </button>
                     )}
                 </div>
 
+                {/* Loading */}
                 {loading ? (
                     <div className="w-full flex items-center justify-center p-20">
                         <div className="border-[#f0d0da] h-6 w-6 animate-spin rounded-full border-4 border-t-[#e87aab]" />
                     </div>
+
                 ) : !cart || cart.items.length === 0 ? (
+                    /* Empty state */
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                         <div className="w-20 h-20 rounded-full bg-[#fce8ee] flex items-center justify-center">
-                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#e87aab" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
-                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+                                stroke="#e87aab" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
                             </svg>
                         </div>
-                        <p className="text-[16px] font-[600] text-[#5a3045]">Your cart is empty</p>
-                        <p className="text-[13px] text-[#c0a0ac]">Add some products to get started</p>
+                        <p className="text-[16px] font-[600] text-[#5a3045]">Giỏ hàng trống</p>
+                        <p className="text-[13px] text-[#c0a0ac]">Thêm sản phẩm để bắt đầu mua sắm</p>
                         <button
                             onClick={() => navigate('/product')}
                             className="px-6 py-2.5 rounded-xl text-white text-[14px] font-[600]
@@ -245,11 +257,15 @@ const CartPage = () => {
                                 hover:shadow-[0_6px_20px_rgba(220,100,150,0.45)] hover:-translate-y-px
                                 transition-all duration-200 border-none cursor-pointer"
                         >
-                            Continue Shopping
+                            Tiếp tục mua sắm
                         </button>
                     </div>
+
                 ) : (
+                    /* Cart content */
                     <div className="flex flex-col lg:flex-row gap-6 items-start">
+
+                        {/* Items list */}
                         <div className="flex-1 flex flex-col gap-3">
                             {cart.items.map((item) => (
                                 <div
@@ -257,68 +273,128 @@ const CartPage = () => {
                                     className="flex items-center gap-4 bg-white rounded-2xl p-4
                                         border border-[#fce8ee] shadow-[0_2px_12px_rgba(200,120,140,0.06)]"
                                 >
+                                    {/* Image */}
                                     <div className="w-20 h-20 rounded-xl overflow-hidden bg-[#fdf5f7] shrink-0">
-                                        <img src={item.productImage} alt={item.productName} className="w-full h-full object-cover" />
+                                        <img
+                                            src={item.productImage}
+                                            alt={item.productName}
+                                            className="w-full h-full object-cover"
+                                        />
                                     </div>
 
+                                    {/* Info */}
                                     <div className="flex-1 flex flex-col gap-1 min-w-0">
-                                        <p className="text-[14px] font-[600] text-[#3d1a2b] truncate">{item.productName}</p>
-                                        <p className="text-[16px] font-[700] text-[#d46080]">${formatMoney(item.price)}</p>
-                                        <p className="text-[12px] text-[#c0a0ac]">Subtotal: ${formatMoney(item.price * item.quantity)}</p>
+                                        <p className="text-[14px] font-[600] text-[#3d1a2b] truncate">
+                                            {item.productName}
+                                        </p>
+
+                                        {/* Color + Size */}
+                                        {(item.color || item.size) && (
+                                            <div className="flex items-center gap-2">
+                                                {item.color && (
+                                                    <div className="flex items-center gap-1">
+                                                        <span
+                                                            className="w-3 h-3 rounded-full border border-gray-300 shrink-0"
+                                                            style={{ background: item.color.value }}
+                                                        />
+                                                        <span className="text-[11px] text-[#c0a0ac]">
+                                                            {item.color.label}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {item.color && item.size && (
+                                                    <span className="text-[11px] text-[#c0a0ac]">·</span>
+                                                )}
+                                                {item.size && (
+                                                    <span className="text-[11px] text-[#c0a0ac]">
+                                                        Size {item.size}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        <p className="text-[16px] font-[700] text-[#d46080]">
+                                            {formatMoney(item.price)}₫
+                                        </p>
+                                        <p className="text-[12px] text-[#c0a0ac]">
+                                            Tạm tính: {formatMoney(item.price * item.quantity)}₫
+                                        </p>
                                     </div>
 
+                                    {/* Quantity */}
                                     <div className="flex items-center gap-2 shrink-0">
                                         <button
                                             onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
                                             disabled={updatingId === item.productId || item.quantity <= 1}
                                             className="w-8 h-8 rounded-lg bg-[#fce8ee] text-[#d46080] text-[16px] font-[700]
                                                 flex items-center justify-center border-none cursor-pointer
-                                                hover:bg-[#f0d0da] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                                hover:bg-[#f0d0da] transition-colors
+                                                disabled:opacity-40 disabled:cursor-not-allowed"
                                         >−</button>
-                                        <span className="w-8 text-center text-[14px] font-[600] text-[#5a3045]">{item.quantity}</span>
+                                        <span className="w-8 text-center text-[14px] font-[600] text-[#5a3045]">
+                                            {item.quantity}
+                                        </span>
                                         <button
                                             onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
                                             disabled={updatingId === item.productId}
                                             className="w-8 h-8 rounded-lg bg-[#fce8ee] text-[#d46080] text-[16px] font-[700]
                                                 flex items-center justify-center border-none cursor-pointer
-                                                hover:bg-[#f0d0da] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                                hover:bg-[#f0d0da] transition-colors
+                                                disabled:opacity-40 disabled:cursor-not-allowed"
                                         >+</button>
                                     </div>
 
+                                    {/* Delete */}
                                     <button
-                                        onClick={() => setConfirmAction({ type: 'remove', productId: item.productId, productName: item.productName })}
+                                        onClick={() => setConfirmAction({
+                                            type: 'remove',
+                                            productId: item.productId,
+                                            productName: item.productName,
+                                        })}
                                         disabled={updatingId === item.productId}
                                         className="w-8 h-8 rounded-lg text-[#c0a0ac] hover:text-[#e06080]
                                             hover:bg-[#fce8ee] flex items-center justify-center
                                             border-none bg-transparent cursor-pointer transition-all
                                             disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                                     >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" strokeWidth="2"
+                                            strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                            <path d="M10 11v6"/><path d="M14 11v6"/>
+                                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
                                         </svg>
                                     </button>
                                 </div>
                             ))}
                         </div>
 
+                        {/* Order summary */}
                         <div className="lg:w-[320px] shrink-0 bg-white rounded-2xl border border-[#fce8ee]
                             shadow-[0_2px_12px_rgba(200,120,140,0.06)] p-6 flex flex-col gap-4 sticky top-4">
-                            <h2 className="text-[16px] font-[700] text-[#3d1a2b]">Order Summary</h2>
+                            <h2 className="text-[16px] font-[700] text-[#3d1a2b]">Tóm tắt đơn hàng</h2>
                             <div className="h-px bg-[#fce8ee]" />
                             <div className="flex flex-col gap-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[13px] text-[#c0a0ac]">Items ({cart.items.length})</span>
-                                    <span className="text-[13px] font-[600] text-[#5a3045]">${formatMoney(cart.totalPrice)}</span>
+                                    <span className="text-[13px] text-[#c0a0ac]">
+                                        Sản phẩm ({cart.items.length})
+                                    </span>
+                                    <span className="text-[13px] font-[600] text-[#5a3045]">
+                                        {formatMoney(cart.totalPrice)}₫
+                                    </span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[13px] text-[#c0a0ac]">Shipping</span>
-                                    <span className="text-[13px] font-[600] text-green-500">Free</span>
+                                    <span className="text-[13px] text-[#c0a0ac]">Phí ship</span>
+                                    <span className="text-[13px] font-[600] text-green-500">Miễn phí</span>
                                 </div>
                             </div>
                             <div className="h-px bg-[#fce8ee]" />
                             <div className="flex items-center justify-between">
-                                <span className="text-[15px] font-[700] text-[#3d1a2b]">Total</span>
-                                <span className="text-[20px] font-[800] text-[#d46080]">${formatMoney(cart.totalPrice)}</span>
+                                <span className="text-[15px] font-[700] text-[#3d1a2b]">Tổng cộng</span>
+                                <span className="text-[20px] font-[800] text-[#d46080]">
+                                    {formatMoney(cart.totalPrice)}₫
+                                </span>
                             </div>
                             <button
                                 onClick={() => navigate('/checkout')}
@@ -326,53 +402,73 @@ const CartPage = () => {
                                     cursor-pointer transition-all duration-200
                                     bg-gradient-to-r from-[#f0a0bc] via-[#e87aab] to-[#d46080]
                                     shadow-[0_6px_20px_rgba(220,100,150,0.35)]
-                                    hover:shadow-[0_8px_28px_rgba(220,100,150,0.5)] hover:-translate-y-0.5 active:scale-[0.97]"
-                            >Proceed to Checkout</button>
+                                    hover:shadow-[0_8px_28px_rgba(220,100,150,0.5)]
+                                    hover:-translate-y-0.5 active:scale-[0.97]"
+                            >
+                                Thanh toán
+                            </button>
                             <button
                                 onClick={() => navigate('/product')}
                                 className="w-full h-[44px] rounded-2xl border border-[#f0d0da] text-[#d46080]
                                     text-[14px] font-[600] bg-white cursor-pointer transition-all
                                     hover:bg-[#fce8ee] active:scale-[0.97]"
-                            >Continue Shopping</button>
+                            >
+                                Tiếp tục mua sắm
+                            </button>
                         </div>
                     </div>
                 )}
             </div>
 
-            {confirmAction && (
-                <Modal open={!!confirmAction} onClose={() => setConfirmAction(null)}>
-                    <div className="bg-white rounded-2xl shadow-[0_8px_40px_rgba(200,120,140,0.18)] p-8 w-[340px]">
-                        <div className="flex flex-col items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-[#fce8ee] flex items-center justify-center">
+            {/* Confirm modal */}
+         {confirmAction && (
+                <Modal open={!!confirmAction} onClose={() => setConfirmAction(null)} size="sm">
+                    <div className="bg-white rounded-2xl overflow-hidden px-8 py-10">
+
+                        {/* Icon */}
+                        <div className="flex justify-center mb-5">
+                            <div className="w-14 h-14 rounded-full bg-[#fce8ee] flex items-center justify-center">
                                 <TrashIcon />
                             </div>
-                            <div className="text-center">
-                                <h3 className="text-[16px] font-bold text-[#5a3045] mb-1">{confirmTitle}</h3>
-                                <p className="text-[13px] text-[#c0a0ac]">{confirmMessage}</p>
-                            </div>
                         </div>
-                        <div className="flex gap-3 mt-7">
-                            <button
-                                type="button"
-                                onClick={() => setConfirmAction(null)}
-                                className="flex-1 h-[42px] rounded-xl border border-[#f0d0da] text-[#c0768a]
-                                    text-[14px] font-[600] bg-white hover:bg-[#fce8ee] transition-all cursor-pointer"
-                            >Cancel</button>
+
+                        {/* Text */}
+                        <div className="text-center mb-8">
+                            <h3 className="text-[18px] font-[700] text-[#5a3045] mb-2">
+                                {confirmTitle}
+                            </h3>
+                            <p className="text-[14px] text-[#c0a0ac] leading-relaxed">
+                                {confirmMessage}
+                            </p>
+                        </div>
+
+                        {/* Buttons — xếp dọc */}
+                        <div className="flex flex-col gap-3">
                             <button
                                 type="button"
                                 onClick={handleConfirm}
-                                className="flex-1 h-[42px] rounded-xl border-none text-white
-                                    text-[14px] font-[600] cursor-pointer transition-all duration-150
-                                    bg-gradient-to-r from-[#f0a0bc] via-[#e87aab] to-[#f0a0bc]
-                                    shadow-[0_3px_12px_rgba(220,100,150,0.25)]
-                                    hover:shadow-[0_4px_16px_rgba(220,100,150,0.4)] hover:-translate-y-px active:scale-[0.98]"
+                                className="w-full h-[48px] rounded-2xl border-none text-white
+                                    text-[15px] font-[600] cursor-pointer transition-all duration-150
+                                    bg-gradient-to-r from-[#f0a0bc] via-[#e87aab] to-[#d46080]
+                                    shadow-[0_4px_14px_rgba(220,100,150,0.3)]
+                                    hover:shadow-[0_6px_20px_rgba(220,100,150,0.45)]
+                                    hover:-translate-y-px active:scale-[0.98]"
                             >
-                                {confirmAction.type === 'clear' ? 'Clear All' : 'Remove'}
+                                {confirmAction.type === 'clear' ? 'Xóa tất cả' : 'Xóa'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setConfirmAction(null)}
+                                className="w-full h-[48px] rounded-2xl border border-[#f0d0da]
+                                    text-[#c0768a] text-[15px] font-[600] bg-white
+                                    hover:bg-[#fce8ee] transition-all cursor-pointer"
+                            >
+                                Hủy
                             </button>
                         </div>
                     </div>
                 </Modal>
-            )}
+)}
         </EcommerceDesktopLayout>
     );
 };

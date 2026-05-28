@@ -17,15 +17,36 @@ export interface OptionGroup {
     options: Option[];
 }
 
+export interface ProductColor {
+    label: string;
+    value: string;
+    thumbnail?: string;
+}
+
+export interface ProductShipping {
+    isFreeShip: boolean;
+    estimatedDelivery: string;
+}
+
 export interface Product {
-    id: string;
+    id?: string;
+    _id?: string;
     name: string;
     description: string;
     price: number;
+    originalPrice?: number;
     quantity: number;
-    image: string;
+    image?: string;
+    images?: string[];
     rating: number;
-    sale: string;
+    totalRatings?: number;
+    totalSold?: number;
+    sale: number;
+    condition?: 'New' | 'Used';
+    colors?: ProductColor[];
+    sizes?: string[];
+    categoryId?: string | null;
+    shipping?: ProductShipping;
 };
 
 export interface User {

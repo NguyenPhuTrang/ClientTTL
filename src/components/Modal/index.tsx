@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react'
+import React, { Fragment } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
@@ -6,13 +6,10 @@ interface Props {
     open: boolean;
     onClose: () => void;
     children: React.ReactNode;
+    size?: 'sm' | 'lg';
 }
 
-const Modal = ({
-    open,
-    onClose,
-    children,
-}: Props) => {
+const Modal = ({ open, onClose, children, size = 'lg' }: Props) => {
     return (
         <Transition.Root show={open} as={Fragment}>
             <Dialog as="div" className="relative z-10" onClose={onClose}>
@@ -29,7 +26,7 @@ const Modal = ({
                 </Transition.Child>
 
                 <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div className="flex min-h-full items-end justify-center text-center sm:items-center">
+                    <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
                         <Transition.Child
                             as={Fragment}
                             enter="ease-out duration-300"
@@ -39,17 +36,24 @@ const Modal = ({
                             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                         >
-                            <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-auto">
-                                <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
+                            <Dialog.Panel className={`relative transform rounded-2xl text-left
+                                shadow-xl transition-all sm:my-8
+                                ${size === 'sm' ? 'w-full max-w-sm' : 'w-full max-w-5xl'}`}>
+
+                                {/* Nút X chỉ hiện với modal lớn */}
+                                {size === 'lg' && (
                                     <button
                                         type="button"
-                                        className="rounded-md bg-white text-gray-400 hover:text-gray-500 outline-none"
                                         onClick={onClose}
+                                        className="absolute right-3 top-3 z-20 rounded-full p-1.5
+                                            bg-white/80 hover:bg-white text-gray-400 hover:text-gray-600
+                                            shadow-sm transition-all outline-none"
                                     >
                                         <span className="sr-only">Close</span>
-                                        <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                                        <XMarkIcon className="h-5 w-5" aria-hidden="true" />
                                     </button>
-                                </div>
+                                )}
+
                                 {children}
                             </Dialog.Panel>
                         </Transition.Child>
